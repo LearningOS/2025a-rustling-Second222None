@@ -43,28 +43,47 @@ impl Default for Person {
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
-        if s.is_empty() {
-            return Self::default();
+        // if s.is_empty() {
+        //     return Self::default();
+        // }
+
+        // let name_age_vec: Vec<&str> = s.split(',').collect();
+        // if name_age_vec.len() != 2 {
+        //     return Self::default();
+        // }
+        // let (name_str, age_str) = (name_age_vec[0], name_age_vec[1]);
+        // //let age_str = name_age_vec[1];
+
+        // if name_str.is_empty() {
+        //     return Self::default();
+        // }
+
+        // let age = age_str.parse::<usize>();
+        // let person = match age {
+        //     Ok(num) => Person { name: name_str.to_string(), age: num },
+        //     Err(_) => { Self::default() },
+        // };
+
+        // person
+
+        let parts: Vec<&str> = s.split(',').collect();
+        match parts.as_slice() {
+            [name, age_str] if !name.is_empty() => {
+                age_str.parse().map_or_else(
+                    |_| Person::default(),
+                    |age| Person {
+                        name: name.to_string(),
+                        age,
+                    },
+                )
+            },
+            _ => Person::default(),
         }
 
-        let name_age_vec: Vec<&str> = s.split(',').collect();
-        if name_age_vec.len() != 2 {
-            return Self::default();
-        }
-        let name_str = name_age_vec[0];
-        let age_str = name_age_vec[1];
-
-        if name_str.is_empty() {
-            return Self::default();
-        }
-
-        let age = age_str.parse::<usize>();
-        let person = match age {
-            Ok(num) => Person { name: name_str.to_string(), age: num },
-            Err(_) => { Self::default() },
-        };
-
-        person
+        // s.split(',').collect::<Vec<_>>().get(0..2)
+        // .and_then(|p| (!p[0].is_empty()).then(|| p))
+        // .and_then(|p| p[1].parse().ok().map(|a| Person { name: p[0].to_string(), age: a }))
+        // .unwrap_or_default()
     }
 }
 
