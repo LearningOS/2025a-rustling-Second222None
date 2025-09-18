@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -29,13 +28,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -72,11 +71,41 @@ impl<T> LinkedList<T> {
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut merged = LinkedList::<T>::new();
+
+        let mut add_node = |node: NonNull<Node<T>>| {
+            let next = unsafe { (*node.as_ptr()).next.take() };
+
+            match merged.end {
+                None => merged.start = Some(node),
+                Some(end) => unsafe { (*end.as_ptr()).next = Some(node) },
+            }
+
+            merged.end = Some(node);
+            merged.length += 1;  
+            next
+        };
+
+        let mut node1_ptr: Option<NonNull<Node<T>>> = list_a.start;
+        let mut node2_ptr: Option<NonNull<Node<T>>> = list_b.start;
+
+        while let (Some(a), Some(b)) = (node1_ptr, node2_ptr) {
+            if unsafe { (*a.as_ptr()).val <= (*b.as_ptr()).val } {
+                node1_ptr = add_node(a);
+            } else {
+                node2_ptr = add_node(b);
+            }
         }
+
+        while let Some(a) = node1_ptr {
+            node1_ptr = add_node(a);
+        }
+
+        while let Some(b) = node2_ptr {
+            node2_ptr = add_node(b);
+        }
+
+		merged
 	}
 }
 
